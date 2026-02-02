@@ -23,5 +23,4 @@ build/
 *.crx
 
 # Store assets (not part of extension)
-screenshots/
 store-assets/
