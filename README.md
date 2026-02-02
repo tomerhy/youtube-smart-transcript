@@ -1,159 +1,102 @@
 # YouTube Smart Transcript
 
-A Chrome Extension that extracts YouTube video transcripts and provides AI-powered features to help users understand videos faster.
+A Chrome Extension that extracts and exports YouTube video transcripts with ease.
 
 ## Features
 
-### 📝 Transcript Extraction & Display
-- Automatically extract transcripts when a YouTube video is opened
-- Display transcript with clickable timestamps
+### Transcript Extraction
+- Automatically extract transcripts from any YouTube video with captions
+- Support for multiple caption languages (manual and auto-generated)
+- Smart paragraph grouping for better readability
+
+### Clickable Timestamps
 - Click any timestamp to jump to that moment in the video
-- Auto-scroll transcript to follow video playback (toggleable)
-- Highlight the current segment being spoken
-- Support for multiple caption languages
+- Timestamps displayed in readable format (HH:MM:SS)
 
-### 🔍 Search Within Transcript
-- Real-time search filtering as you type
-- Highlight matching text in results
-- Mini-timeline showing where matches appear in the video
-- Click any result to jump to that timestamp
+### Export Options
+- **Copy** - Copy full transcript text to clipboard
+- **Text (.txt)** - Download as plain text file
+- **Subtitle (.srt)** - Download as SRT subtitle file for video players
+- **Markdown (.md)** - Download as Markdown with video link
 
-### 🤖 AI-Powered Q&A
-- Ask questions about the video content
-- Get answers with relevant timestamp references
-- Clickable timestamps in answers to jump to specific parts
-- Quick action buttons for common queries:
-  - Main Points
-  - Summary
-  - Tips & Advice
-  - Key Takeaways
-
-### 📤 Export Options
-- Copy full transcript to clipboard
-- Download as .txt file
-- Download as .md file (with clickable timestamp links)
-- Copy Q&A history
-
-### 🎨 Theming
-- Light mode
-- Dark mode
-- System preference (auto-detect)
+### Clean Interface
+- Appears on the right side of YouTube video pages
+- Collapsible panel to save space
+- Dark mode support (follows YouTube theme)
+- Language selector dropdown
 
 ## Installation
 
+### From Chrome Web Store
+Coming soon!
+
 ### From Source (Developer Mode)
 
-1. **Clone or Download** this repository to your local machine
-
-2. **Open Chrome** and navigate to `chrome://extensions/`
-
-3. **Enable Developer Mode** by toggling the switch in the top right corner
-
-4. **Click "Load unpacked"** and select the `extension` folder from this repository
-
-5. **Pin the extension** (optional) by clicking the puzzle piece icon in Chrome's toolbar and pinning "YouTube Smart Transcript"
-
-> **Note about Icons:** The extension includes basic PNG icons. If you want custom icons, open `icons/generate-icons.html` in your browser to generate and download new icons.
-
-### Setting Up the API Key (Required for Q&A)
-
-1. Get your Claude API key from [Anthropic Console](https://console.anthropic.com/)
-2. Click the extension icon while on a YouTube page to open the side panel
-3. Click the gear icon (⚙️) to open Settings
-4. Enter your API key in the "Claude API Key" field
-5. Click "Save Settings"
+1. Clone or download this repository
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable **Developer Mode** (toggle in top right)
+4. Click **Load unpacked** and select the project folder
+5. Go to any YouTube video - the transcript panel appears on the right
 
 ## Usage
 
-1. **Open a YouTube video** - The extension automatically activates on YouTube
+1. **Open a YouTube video** with captions/subtitles available
+2. **Find the transcript panel** on the right side of the page
+3. **Select language** from the dropdown (if multiple available)
+4. **Click timestamps** to jump to specific moments
+5. **Export** using Copy or Export dropdown (TXT, SRT, MD)
 
-2. **Click the extension icon** to open the side panel
+## Permissions
 
-3. **View the Transcript** - The transcript tab shows the full video transcript with clickable timestamps
+| Permission | Purpose |
+|------------|---------|
+| `activeTab` | Interact with YouTube video pages |
+| `storage` | Store user preferences (future use) |
+| `host_permissions` | Access YouTube to fetch caption data |
 
-4. **Search** - Use the search bar to find specific content within the transcript
+## Privacy
 
-5. **Ask Questions** - Switch to the Q&A tab to ask questions about the video. The AI will answer based on the transcript and provide relevant timestamps.
+- **No data collection** - All processing happens locally in your browser
+- **No tracking** - No analytics or third-party services
+- **No server** - Transcripts are never sent anywhere
 
-6. **Export** - Use the Export tab to save the transcript or Q&A history
+[View Full Privacy Policy](https://tomerhy.github.io/thy-production-privacy/youtube-smart-transcript/)
 
 ## File Structure
 
 ```
-/extension
-  /icons
-    icon16.png
-    icon48.png
-    icon128.png
-  /src
-    /styles
-      panel.css         # All styles with dark/light mode support
-    /scripts
-      background.js     # Service worker for extension lifecycle
-      content.js        # YouTube page interaction
-      panel.js          # Side panel UI logic
-      api.js            # Claude API integration
-      transcript.js     # Transcript extraction and utilities
-  sidepanel.html        # Side panel HTML structure
-  manifest.json         # Chrome Extension manifest (v3)
-  README.md             # This file
+youtube-smart-transcript/
+├── content.js          # Main extension logic
+├── styles.css          # UI styles
+├── popup.html          # Extension popup
+├── popup.js            # Popup logic
+├── manifest.json       # Extension manifest
+├── icons/              # Extension icons
+│   ├── icon-16.png
+│   ├── icon-48.png
+│   ├── icon-128.png
+│   └── avatar.png
+└── README.md
 ```
-
-## Technical Details
-
-### Manifest V3
-This extension uses Chrome Extension Manifest V3, the latest standard for Chrome extensions.
-
-### Permissions
-- `activeTab` - Access the current tab
-- `sidePanel` - Use Chrome's side panel API
-- `storage` - Store settings and API key
-- `scripting` - Inject content scripts
-
-### Transcript Extraction
-The extension extracts transcripts using YouTube's timedtext API by:
-1. Fetching the video page HTML
-2. Parsing `ytInitialPlayerResponse` for caption tracks
-3. Fetching caption data in XML format
-4. Parsing and formatting the transcript segments
-
-### API Integration
-- Uses Claude claude-sonnet-4-20250514 model for Q&A
-- API key stored securely in `chrome.storage.sync`
-- Handles rate limiting and error states gracefully
-
-## Keyboard Shortcuts
-
-- `Ctrl+F` / `Cmd+F` - Focus search input (when on Transcript tab)
-- `Escape` - Clear search or close settings modal
 
 ## Troubleshooting
 
-### "No transcript available"
-This can happen when:
-- The video doesn't have captions enabled
-- The video is age-restricted or private
-- YouTube's API structure has changed
+### "No captions available"
+- The video doesn't have captions enabled by the creator
+- Try a different video with CC available
 
-### Q&A not working
-- Check that you've entered a valid Claude API key in Settings
-- Ensure you have sufficient API credits
-- Check your internet connection
-
-### Extension not loading on YouTube
+### Panel not appearing
+- Refresh the page (Cmd+R / F5)
 - Make sure you're on a video page (youtube.com/watch?v=...)
-- Try refreshing the page
-- Check if the extension is enabled in chrome://extensions
+- Check if extension is enabled in chrome://extensions
 
-## Privacy
-
-- Your Claude API key is stored locally in Chrome's sync storage
-- Transcripts are only sent to Claude when you use the Q&A feature
-- No data is collected or sent to any other servers
+### Export not working
+- Load a transcript first before exporting
+- Check browser's download permissions
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Contributions are welcome! Feel free to submit issues or pull requests.
 
 ## License
 
@@ -161,4 +104,4 @@ MIT License - feel free to use this code in your own projects.
 
 ---
 
-Made with ❤️ for better YouTube learning
+Made with care by **THY Production**

@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Transcript Reader",
+  "name": "YouTube Smart Transcript",
   "version": "1.0.0",
-  "description": "Extract subtitles and transcripts from YouTube videos",
+  "description": "Extract, view, and export YouTube video transcripts. Copy to clipboard or download as TXT, SRT, or Markdown.",
+  "author": "THY Production",
+  "homepage_url": "https://github.com/tomerhy/youtube-smart-transcript",
   "permissions": ["activeTab", "storage"],
   "host_permissions": ["https://www.youtube.com/*"],
   "action": {
