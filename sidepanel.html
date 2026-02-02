@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Smart Transcript</title>
+  <link rel="stylesheet" href="src/styles/panel.css">
+</head>
+<body>
+  <div class="container" id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3v18M3 12h18M8 8l8 8M16 8l-8 8"/>
+        </svg>
+        <h1 class="header-title">Smart Transcript</h1>
+      </div>
+      <button class="icon-btn" id="settings-btn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Video Title -->
+    <div class="video-info" id="video-info">
+      <p class="video-title" id="video-title">Open a YouTube video to get started</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="transcript">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Transcript
+      </button>
+      <button class="tab" data-tab="qa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        Q&A
+      </button>
+      <button class="tab" data-tab="export">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Export
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <!-- Transcript Tab -->
+      <section class="tab-content active" id="transcript-tab">
+        <!-- Search Bar -->
+        <div class="search-container">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="search-input" id="search-input" placeholder="Search transcript...">
+          <button class="clear-search" id="clear-search" title="Clear search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Auto-scroll Toggle -->
+        <div class="auto-scroll-container">
+          <label class="toggle-label" for="auto-scroll-toggle">
+            <input type="checkbox" id="auto-scroll-toggle" checked>
+            <span class="toggle-slider"></span>
+            <span class="toggle-text">Auto-scroll with video</span>
+          </label>
+        </div>
+
+        <!-- Language Selector -->
+        <div class="language-selector" id="language-selector" style="display: none;">
+          <label for="language-select">Caption Language:</label>
+          <select id="language-select"></select>
+        </div>
+
+        <!-- Transcript Content -->
+        <div class="transcript-container" id="transcript-container">
+          <div class="loading" id="transcript-loading">
+            <div class="spinner"></div>
+            <p>Loading transcript...</p>
+          </div>
+          <div class="transcript-list" id="transcript-list"></div>
+          <div class="no-transcript" id="no-transcript" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <p>No transcript available for this video.</p>
+            <p class="subtext">This video may not have captions/CC enabled by the creator.</p>
+            <button class="retry-btn" id="retry-transcript">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              Retry
+            </button>
+          </div>
+        </div>
+
+        <!-- Mini Timeline -->
+        <div class="mini-timeline" id="mini-timeline">
+          <div class="timeline-bar">
+            <div class="timeline-progress" id="timeline-progress"></div>
+            <div class="timeline-markers" id="timeline-markers"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Q&A Tab -->
+      <section class="tab-content" id="qa-tab">
+        <div class="qa-input-container">
+          <textarea 
+            class="qa-input" 
+            id="qa-input" 
+            placeholder="Ask anything about this video...&#10;&#10;Examples:&#10;• What are the main points?&#10;• Summarize the section about...&#10;• List all tips mentioned"
+            rows="4"
+          ></textarea>
+          <button class="qa-submit" id="qa-submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            Ask
+          </button>
+        </div>
+
+        <div class="api-key-notice" id="api-key-notice" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <p>API key required for Q&A feature.</p>
+          <button class="btn-link" id="open-settings-from-qa">Open Settings</button>
+        </div>
+
+        <div class="qa-response-container" id="qa-response-container">
+          <div class="qa-loading" id="qa-loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyzing transcript...</p>
+          </div>
+          <div class="qa-responses" id="qa-responses"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions" id="quick-actions">
+          <p class="quick-actions-label">Quick actions:</p>
+          <div class="quick-action-buttons">
+            <button class="quick-action-btn" data-prompt="What are the main points of this video?">
+              📝 Main Points
+            </button>
+            <button class="quick-action-btn" data-prompt="Give me a brief summary of this video.">
+              📋 Summary
+            </button>
+            <button class="quick-action-btn" data-prompt="List all tips, advice, or recommendations mentioned.">
+              💡 Tips & Advice
+            </button>
+            <button class="quick-action-btn" data-prompt="What are the key takeaways from this video?">
+              🎯 Key Takeaways
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Export Tab -->
+      <section class="tab-content" id="export-tab">
+        <div class="export-options">
+          <h3 class="export-title">Export Transcript</h3>
+          
+          <button class="export-btn" id="export-copy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+            <div class="export-btn-text">
+              <span class="export-btn-title">Copy to Clipboard</span>
+              <span class="export-btn-subtitle">Plain text format</span>
+            </div>
+          </button>
+
+          <button class="export-btn" id="export-txt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <div class="export-btn-text">
+              <span class="export-btn-title">Download as TXT</span>
+              <span class="export-btn-subtitle">Plain text file</span>
+            </div>
+          </button>
+
+          <button class="export-btn" id="export-md">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <path d="M9 15l2 2 4-4"/>
+            </svg>
+            <div class="export-btn-text">
+              <span class="export-btn-title">Download as Markdown</span>
+              <span class="export-btn-subtitle">With clickable timestamps</span>
+            </div>
+          </button>
+
+          <div class="export-divider"></div>
+
+          <h3 class="export-title">Export Q&A</h3>
+          
+          <button class="export-btn" id="export-qa" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <div class="export-btn-text">
+              <span class="export-btn-title">Copy Q&A History</span>
+              <span class="export-btn-subtitle">All questions and answers</span>
+            </div>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settings-modal" style="display: none;">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button class="icon-btn" id="close-settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-content">
+          <!-- API Key -->
+          <div class="setting-group">
+            <label class="setting-label" for="api-key-input">Claude API Key</label>
+            <div class="api-key-input-container">
+              <input 
+                type="password" 
+                class="setting-input" 
+                id="api-key-input" 
+                placeholder="sk-ant-..."
+              >
+              <button class="icon-btn" id="toggle-api-key-visibility" title="Show/Hide">
+                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                  <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+              </button>
+            </div>
+            <p class="setting-hint">Required for AI Q&A features. Get your key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a></p>
+          </div>
+
+          <!-- Theme -->
+          <div class="setting-group" role="group" aria-labelledby="theme-label">
+            <span class="setting-label" id="theme-label">Theme</span>
+            <div class="theme-options">
+              <button class="theme-btn" data-theme="light">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="5"/>
+                  <line x1="12" y1="1" x2="12" y2="3"/>
+                  <line x1="12" y1="21" x2="12" y2="23"/>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                  <line x1="1" y1="12" x2="3" y2="12"/>
+                  <line x1="21" y1="12" x2="23" y2="12"/>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                Light
+              </button>
+              <button class="theme-btn" data-theme="dark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                Dark
+              </button>
+              <button class="theme-btn active" data-theme="system">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                System
+              </button>
+            </div>
+          </div>
+
+          <!-- Auto-scroll -->
+          <div class="setting-group">
+            <label class="toggle-label setting-toggle" for="settings-auto-scroll">
+              <span>Auto-scroll transcript with video</span>
+              <input type="checkbox" id="settings-auto-scroll" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Save Button -->
+          <button class="btn-primary" id="save-settings">Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script type="module" src="src/scripts/panel.js"></script>
+</body>
+</html>
