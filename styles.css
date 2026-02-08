@@ -7,6 +7,16 @@
   margin-bottom: 16px;
   font-family: 'Roboto', Arial, sans-serif;
   overflow: hidden;
+  /* Force visibility */
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 100 !important;
+  /* Force dimensions */
+  min-width: 300px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 html[dark] #yt-transcript-container {

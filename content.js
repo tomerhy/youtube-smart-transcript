@@ -22,8 +22,10 @@ class YouTubeTranscriptExtractor {
   }
 
   init() {
+    console.log('[YT Transcript] Initializing extension...');
     this.observeURLChanges();
     this.injectUI();
+    this.startPanelCheck();
   }
 
   getVideoId(url) {
@@ -40,13 +42,26 @@ class YouTubeTranscriptExtractor {
     const observer = new MutationObserver(() => {
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
+        console.log('[YT Transcript] URL changed:', lastUrl);
+        
         const newVideoId = this.getVideoId(lastUrl);
         if (newVideoId && newVideoId !== this.videoId) {
           this.videoId = newVideoId;
           this.transcriptData = [];
           this.potToken = null;
           this.subtitlesList = [];
-          this.updateUI();
+          
+          // Re-inject UI if it doesn't exist (SPA navigation)
+          if (!document.getElementById('yt-transcript-container')) {
+            console.log('[YT Transcript] Panel missing after navigation, re-injecting...');
+            setTimeout(() => this.injectUI(), 500);
+          } else {
+            this.updateUI();
+          }
+        } else if (lastUrl.includes('/watch') && !document.getElementById('yt-transcript-container')) {
+          // Navigated to a video page but panel doesn't exist
+          console.log('[YT Transcript] On video page but no panel, injecting...');
+          setTimeout(() => this.injectUI(), 500);
         }
       }
     });
@@ -393,8 +408,29 @@ class YouTubeTranscriptExtractor {
   }
 
   injectUI() {
-    this.waitForElement('#secondary, #related').then(container => {
-      if (document.getElementById('yt-transcript-container')) return;
+    // Only inject on video pages
+    if (!window.location.pathname.includes('/watch')) {
+      console.log('[YT Transcript] Not a video page, skipping UI injection');
+      return;
+    }
+    
+    console.log('[YT Transcript] Attempting to inject UI...');
+    
+    // Prefer #secondary (main sidebar), fallback to #related
+    this.waitForElement('#secondary, #secondary-inner, ytd-watch-flexy #secondary, #related').then(container => {
+      if (document.getElementById('yt-transcript-container')) {
+        console.log('[YT Transcript] Panel already exists');
+        return;
+      }
+      
+      // Wait for container to have dimensions
+      if (container.offsetWidth === 0) {
+        console.log('[YT Transcript] Container has no width, waiting...');
+        setTimeout(() => this.injectUI(), 500);
+        return;
+      }
+      
+      console.log('[YT Transcript] Found container, injecting panel. Width:', container.offsetWidth);
 
       const avatarUrl = this.getAvatarUrl();
       const avatarHtml = avatarUrl 
@@ -434,9 +470,40 @@ class YouTubeTranscriptExtractor {
       `;
 
       container.insertBefore(panel, container.firstChild);
+      console.log('[YT Transcript] Panel inserted. Container:', container.id || container.className);
+      console.log('[YT Transcript] Panel in DOM:', !!document.getElementById('yt-transcript-container'));
+      console.log('[YT Transcript] Panel dimensions (immediate):', panel.offsetWidth, 'x', panel.offsetHeight);
+      
+      // Check dimensions after a brief delay
+      setTimeout(() => {
+        const p = document.getElementById('yt-transcript-container');
+        if (p) {
+          console.log('[YT Transcript] Panel dimensions (after 100ms):', p.offsetWidth, 'x', p.offsetHeight);
+          console.log('[YT Transcript] Panel computed style display:', window.getComputedStyle(p).display);
+          console.log('[YT Transcript] Panel parent:', p.parentElement?.id || p.parentElement?.className);
+          console.log('[YT Transcript] Panel parent dimensions:', p.parentElement?.offsetWidth, 'x', p.parentElement?.offsetHeight);
+        }
+      }, 100);
+      
+      // Watch for removal
+      this.watchForRemoval(panel);
+      
       this.bindEvents(panel);
       this.loadLanguages();
+    }).catch(err => {
+      console.log('[YT Transcript] Failed to inject UI:', err.message);
     });
+  }
+  
+  watchForRemoval(panel) {
+    const observer = new MutationObserver((mutations) => {
+      if (!document.body.contains(panel)) {
+        console.log('[YT Transcript] Panel was removed from DOM! Re-injecting in 500ms...');
+        observer.disconnect();
+        setTimeout(() => this.injectUI(), 500);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   bindEvents(panel) {
@@ -565,8 +632,8 @@ class YouTubeTranscriptExtractor {
     }
   }
 
-  waitForElement(selector) {
-    return new Promise(resolve => {
+  waitForElement(selector, timeout = 10000) {
+    return new Promise((resolve, reject) => {
       const selectors = selector.split(', ');
       
       for (const sel of selectors) {
@@ -579,6 +646,7 @@ class YouTubeTranscriptExtractor {
           const el = document.querySelector(sel);
           if (el) {
             observer.disconnect();
+            clearTimeout(timeoutId);
             resolve(el);
             return;
           }
@@ -586,7 +654,35 @@ class YouTubeTranscriptExtractor {
       });
 
       observer.observe(document.body, { childList: true, subtree: true });
+      
+      // Timeout to prevent hanging forever
+      const timeoutId = setTimeout(() => {
+        observer.disconnect();
+        console.log('[YT Transcript] waitForElement timed out for:', selector);
+        reject(new Error('Element not found: ' + selector));
+      }, timeout);
     });
+  }
+  
+  // Periodic check to ensure panel exists on video pages
+  startPanelCheck() {
+    // Initial delay to let YouTube fully load
+    setTimeout(() => {
+      if (window.location.pathname.includes('/watch') && !document.getElementById('yt-transcript-container')) {
+        console.log('[YT Transcript] Initial delayed check: Panel missing, injecting...');
+        this.injectUI();
+      }
+    }, 1500);
+    
+    // Periodic check every 3 seconds
+    setInterval(() => {
+      if (window.location.pathname.includes('/watch') && 
+          !document.getElementById('yt-transcript-container') &&
+          (document.querySelector('#secondary') || document.querySelector('#related'))) {
+        console.log('[YT Transcript] Periodic check: Panel missing, re-injecting...');
+        this.injectUI();
+      }
+    }, 3000);
   }
 }
 
