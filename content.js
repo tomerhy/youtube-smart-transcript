@@ -488,6 +488,11 @@ class YouTubeTranscriptExtractor {
       // Watch for removal
       this.watchForRemoval(panel);
       
+      // Track extension load
+      if (window.ytTranscriptAnalytics) {
+        window.ytTranscriptAnalytics.trackExtensionLoad();
+      }
+      
       this.bindEvents(panel);
       this.loadLanguages();
     }).catch(err => {
@@ -513,12 +518,18 @@ class YouTubeTranscriptExtractor {
     toggle.addEventListener('click', () => {
       body.classList.toggle('collapsed');
       toggle.textContent = body.classList.contains('collapsed') ? '▶' : '▼';
+      if (window.ytTranscriptAnalytics) {
+        window.ytTranscriptAnalytics.trackPanelToggle(body.classList.contains('collapsed'));
+      }
     });
 
     const langSelect = panel.querySelector('#yt-transcript-lang');
     langSelect.addEventListener('change', (e) => {
       if (e.target.value) {
         this.loadTranscript(e.target.value);
+        if (window.ytTranscriptAnalytics) {
+          window.ytTranscriptAnalytics.trackLanguageChange(this.videoId, e.target.value);
+        }
       }
     });
 
@@ -529,6 +540,9 @@ class YouTubeTranscriptExtractor {
           .map(item => item.text)
           .join('\n\n');
         this.copyToClipboard(text);
+        if (window.ytTranscriptAnalytics) {
+          window.ytTranscriptAnalytics.trackCopy(this.videoId);
+        }
       }
     });
 
@@ -549,6 +563,9 @@ class YouTubeTranscriptExtractor {
         else if (format === 'srt') this.exportAsSRT();
         else if (format === 'md') this.exportAsMarkdown();
         exportMenu.classList.remove('show');
+        if (window.ytTranscriptAnalytics) {
+          window.ytTranscriptAnalytics.trackExport(this.videoId, format);
+        }
       });
     });
 
@@ -601,9 +618,19 @@ class YouTubeTranscriptExtractor {
       this.transcriptData = this.groupTranscriptByParagraphs(rawTranscript);
       this.videoTitle = this.getVideoTitle();
       this.renderTranscript();
+      
+      // Track successful load
+      if (window.ytTranscriptAnalytics) {
+        window.ytTranscriptAnalytics.trackTranscriptLoad(this.videoId, trackUrl.split('lang=')[1]?.split('&')[0] || 'unknown', true);
+      }
     } catch (error) {
       console.error('[YT Transcript] Load error:', error);
       content.innerHTML = `<div class="yt-transcript-error">${error.message}</div>`;
+      
+      // Track error
+      if (window.ytTranscriptAnalytics) {
+        window.ytTranscriptAnalytics.trackError('transcript_load', error.message);
+      }
     }
   }
 
@@ -620,7 +647,11 @@ class YouTubeTranscriptExtractor {
 
     content.querySelectorAll('.yt-transcript-time').forEach(el => {
       el.addEventListener('click', () => {
-        this.seekToTime(parseFloat(el.dataset.seconds));
+        const seconds = parseFloat(el.dataset.seconds);
+        this.seekToTime(seconds);
+        if (window.ytTranscriptAnalytics) {
+          window.ytTranscriptAnalytics.trackTimestampClick(this.videoId, seconds);
+        }
       });
     });
   }

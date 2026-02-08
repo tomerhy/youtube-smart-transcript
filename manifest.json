@@ -1,12 +1,15 @@
 {
   "manifest_version": 3,
   "name": "YouTube Smart Transcript",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Extract, view, and export YouTube video transcripts. Copy to clipboard or download as TXT, SRT, or Markdown.",
   "author": "THY Production",
   "homepage_url": "https://github.com/tomerhy/youtube-smart-transcript",
   "permissions": ["activeTab"],
-  "host_permissions": ["https://www.youtube.com/*"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://www.google-analytics.com/*"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -18,7 +21,7 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["content.js"],
+      "js": ["analytics.js", "content.js"],
       "css": ["styles.css"]
     }
   ],
