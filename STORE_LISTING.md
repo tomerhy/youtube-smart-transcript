@@ -39,9 +39,10 @@ Extract, view, and export YouTube video transcripts. Copy to clipboard or downlo
 4. Click timestamps to navigate or export the transcript
 
 **PRIVACY FOCUSED**
-- No data collection whatsoever
-- All processing happens locally in your browser
-- No accounts, no tracking, no third-party services
+- Transcript processing happens locally in your browser
+- Anonymous usage analytics (Google Analytics 4) to improve the extension
+- No personal data collection, no video content tracking
+- No accounts required
 
 Perfect for students, researchers, content creators, and anyone who wants to save or reference video content!
 
